@@ -1,0 +1,29 @@
+{
+  "name": "ticket-system",
+  "version": "1.0.0",
+  "description": "A simple ticket management system built as a portfolio project.",
+  "homepage": "https://github.com/rgtbnty/ticket-system#readme",
+  "bugs": {
+    "url": "https://github.com/rgtbnty/ticket-system/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rgtbnty/ticket-system.git"
+  },
+  "license": "ISC",
+  "author": "rgtbnty",
+  "type": "module",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "node backend/src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "pg": "^8.16.3"
+  }
+}
