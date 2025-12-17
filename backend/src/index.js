@@ -1,26 +1,18 @@
-import "dotenv/config";
-import express from "express";
+import app from "./app.js";
 import { pool } from "./db.js";
 
+const PORT = 3000;
 
-
-const app = express();
-app.use(express.json());
-
-try {
+(async () => {
+  try {
     await pool.query("SELECT 1");
     console.log("DB connected");
-} catch (err) {
-    console.error("DB connection failed", err);
+
+    app.listen(PORT, () => {
+      console.log("API running");
+    });
+  } catch (err) {
+    console.error("Failed to start server", err);
     process.exit(1);
-}
-
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
-app.listen(3000, () => {
-  console.log("API running");
-});
-
-
+  }
+})();
