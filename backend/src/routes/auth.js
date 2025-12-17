@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { pool } from "../db.js";
-
+import authenticate from "../middleware/auth.js";
 
 
 const router = express.Router();
@@ -93,6 +93,13 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// GET /auth/me login user
+router.get("/me", authenticate, (req, res) => {
+  res.json({
+    id: req.user.userId,
+    email: req.user.email,
+  });
+});
 
 
 
