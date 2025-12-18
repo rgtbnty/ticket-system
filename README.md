@@ -10,5 +10,12 @@ This project is a web-based ticket management system with authentication and CRU
 - Auth: JWT
 - Infra: Docker
 
+## API Testing
+Frequently used API endpoints are automated using shell scripts.
+```bash
+source scripts/login.sh
+./scripts/create_ticket.sh
+```
+
 ## Status
 🚧 Work in progress
