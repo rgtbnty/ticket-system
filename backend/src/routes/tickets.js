@@ -81,4 +81,44 @@ router.get("/:id", authenticate, async (req, res) => {
   }
 });
 
+// update ticket
+router.patch("/:id", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, status } = req.body;
+    const userId = req.user.userId;
+
+    // no change
+    if (!title && !description && !status) {
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE tickets
+      SET
+        title = COALESCE($1, title),
+        description = COALESCE($2, description),
+        status = COALESCE($3, status),
+        updated_at = NOW()
+      WHERE id = $4
+        AND created_by = $5
+        AND is_deleted = false
+      RETURNING id, title, description, status, updated_at
+      `,
+      [title, description, status, id, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 export default router;
