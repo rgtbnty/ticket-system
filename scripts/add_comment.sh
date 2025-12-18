@@ -6,11 +6,7 @@ if [ -z "$TOKEN" ]; then
 fi
 
 
-
-curl -i -X PATCH http://localhost:3000/tickets/$TICKET_ID \
+curl -X POST http://localhost:3000/tickets/$TICKET_ID/comments \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{
-    "title": "Updated title",
-    "status": "in_progress"
-  }'
+  -d '{"body":"First comment"}'

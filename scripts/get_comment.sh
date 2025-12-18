@@ -6,5 +6,5 @@ if [ -z "$TOKEN" ]; then
 fi
 
 
-curl -X DELETE http://localhost:3000/tickets/$TICKET_ID \
+curl -X GET http://localhost:3000/tickets/$TICKET_ID/comments \
   -H "Authorization: Bearer $TOKEN"
