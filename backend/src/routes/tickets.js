@@ -149,6 +149,89 @@ router.delete("/:id", authenticate, async (req, res) => {
   }
 });
 
+/**
+ * POST /tickets/:id/comments
+ * Create a comment for a ticket
+ */
+router.post("/:id/comments", authenticate, async (req, res) => {
+  const ticketId = req.params.id;
+  const userId = req.user.userId;
+  const { body } = req.body;
 
+  if (!body) {
+    return res.status(400).json({ error: "Comment body is required" });
+  }
+
+  try {
+    // Check ticket exists and not deleted
+    const ticketResult = await pool.query(
+      `
+      SELECT id
+      FROM tickets
+      WHERE id = $1 AND is_deleted = false
+      `,
+      [ticketId]
+    );
+
+    if (ticketResult.rows.length === 0) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    // Insert comment
+    const commentResult = await pool.query(
+      `
+      INSERT INTO comments (ticket_id, user_id, body)
+      VALUES ($1, $2, $3)
+      RETURNING id, body, user_id, created_at
+      `,
+      [ticketId, userId, body]
+    );
+
+    res.status(201).json(commentResult.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create comment" });
+  }
+});
+
+/**
+ * GET /tickets/:id/comments
+ * Get comments for a ticket
+ */
+router.get("/:id/comments", authenticate, async (req, res) => {
+  const ticketId = req.params.id;
+
+  try {
+    // Check ticket exists and not deleted
+    const ticketResult = await pool.query(
+      `
+      SELECT id
+      FROM tickets
+      WHERE id = $1 AND is_deleted = false
+      `,
+      [ticketId]
+    );
+
+    if (ticketResult.rows.length === 0) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    // Get comments
+    const commentsResult = await pool.query(
+      `
+      SELECT id, body, user_id, created_at
+      FROM comments
+      WHERE ticket_id = $1
+      ORDER BY created_at ASC
+      `,
+      [ticketId]
+    );
+
+    res.json(commentsResult.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch comments" });
+  }
+});
 
 export default router;
