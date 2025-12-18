@@ -53,4 +53,32 @@ router.get("/", authenticate, async (req, res) => {
   }
 });
 
+// get ticket detail
+router.get("/:id", authenticate, async (req, res) => {
+  try {
+    const ticketId = req.params.id;
+    const userId = req.user.userId;
+
+    const result = await pool.query(
+      `
+      SELECT id, title, description, status, created_at
+      FROM tickets
+      WHERE id = $1
+        AND created_by = $2
+        AND is_deleted = false
+      `,
+      [ticketId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("GET /tickets/:id error:", err);
+    res.status(500).json({ error: "Failed to fetch ticket" });
+  }
+});
+
 export default router;
