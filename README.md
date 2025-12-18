@@ -17,5 +17,9 @@ source scripts/login.sh
 ./scripts/create_ticket.sh
 ```
 
+## Environment Variables
+Copy `.env.example` to `.env` and set your own values.
+
+
 ## Status
 🚧 Work in progress
