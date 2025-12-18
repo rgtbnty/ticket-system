@@ -5,6 +5,7 @@ import authenticate from "../middleware/auth.js";
 
 const router = express.Router();
 
+// create ticket
 router.post("/", authenticate, async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -26,6 +27,29 @@ router.post("/", authenticate, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create ticket" });
+  }
+});
+
+// retrieve ticket list
+router.get("/", authenticate, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const result = await pool.query(
+      `
+      SELECT id, title, status, created_at
+      FROM tickets
+      WHERE created_by = $1
+        AND is_deleted = false
+      ORDER BY created_at DESC
+      `,
+      [userId]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("GET /tickets error:", err);
+    res.status(500).json({ error: "Failed to fetch tickets" });
   }
 });
 
