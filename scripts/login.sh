@@ -1,7 +1,7 @@
 #!/bin/bash
 
 API_URL="http://localhost:3000"
-EMAIL="EMAIL"
+EMAIL="test+1@example.com"
 PASSWORD="1234567"
 
 response=$(curl -s -X POST "$API_URL/auth/login" \
