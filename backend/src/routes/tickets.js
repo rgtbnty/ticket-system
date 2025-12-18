@@ -120,5 +120,35 @@ router.patch("/:id", authenticate, async (req, res) => {
   }
 });
 
+// logical delete ticket
+router.delete("/:id", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId;
+
+    const result = await pool.query(
+      `
+      UPDATE tickets
+      SET is_deleted = true,
+          updated_at = NOW()
+      WHERE id = $1
+        AND created_by = $2
+        AND is_deleted = false
+      `,
+      [id, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    res.status(204).end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 
 export default router;
