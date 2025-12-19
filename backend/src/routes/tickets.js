@@ -199,35 +199,48 @@ router.post("/:id/comments", authenticate, async (req, res) => {
  * Get comments for a ticket
  */
 router.get("/:id/comments", authenticate, async (req, res) => {
-  const ticketId = req.params.id;
+  const { id: ticketId } = req.params;
 
   try {
     // Check ticket exists and not deleted
     const ticketResult = await pool.query(
-      `
-      SELECT id
-      FROM tickets
-      WHERE id = $1 AND is_deleted = false
-      `,
+      "SELECT id FROM tickets WHERE id = $1 AND is_deleted = false",
       [ticketId]
     );
 
-    if (ticketResult.rows.length === 0) {
+    if (ticketResult.rowCount === 0) {
       return res.status(404).json({ error: "Ticket not found" });
     }
 
     // Get comments
-    const commentsResult = await pool.query(
+    const result = await pool.query(
       `
-      SELECT id, body, user_id, created_at
-      FROM comments
-      WHERE ticket_id = $1
-      ORDER BY created_at ASC
+      SELECT
+        c.id,
+        c.body,
+        c.created_at,
+        u.id AS user_id,
+        u.email
+      FROM comments c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.ticket_id = $1
+      ORDER BY c.created_at ASC
       `,
       [ticketId]
     );
 
-    res.json(commentsResult.rows);
+    // nest (user_id and email) in user
+    const comments = result.rows.map(row => ({
+      id: row.id,
+      body: row.body,
+      created_at: row.created_at,
+      user: {
+        id: row.user_id,
+        email: row.email,
+      },
+    }));
+
+    res.json(comments);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch comments" });
